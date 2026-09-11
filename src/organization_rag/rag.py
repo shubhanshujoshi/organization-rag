@@ -15,8 +15,16 @@ class OrganizationRAG:
             request_timeout=300.0,
         )
 
-    def answer(self, question: str) -> str:
-        results = retrieve(question)
+    def answer(
+        self,
+        question: str,
+        department: str | None = None,
+    ) -> str:
+
+        results = retrieve(
+            query=question,
+            department=department,
+        )
 
         if not results:
             return (
@@ -50,6 +58,9 @@ STRICT GROUNDING RULES:
 4. Cite factual claims using [Source N].
 5. If the context does not contain enough information, say:
    "The provided documents do not contain enough information to answer this."
+
+Authorized department:
+{department if department else "All authorized departments"}
 
 Retrieved context:
 {context}

@@ -17,23 +17,41 @@ def load_rag():
 
 rag = load_rag()
 
+
 st.title("📚 Organization RAG Assistant")
+
 st.write(
-    "Ask questions about the organization's documents. "
-    "Answers are generated only from the retrieved documents."
+    "Ask questions about organization documents. "
+    "Your department determines which documents can be retrieved."
 )
+
+
+department = st.selectbox(
+    "Select your department",
+    [
+        "placement",
+        "hr",
+        "finance",
+        "academic",
+    ],
+)
+
 
 question = st.text_input(
     "Ask a question",
     placeholder="e.g. How many placement attempts are allowed?",
 )
 
+
 if st.button("Ask"):
     if not question.strip():
         st.warning("Please enter a question.")
     else:
-        with st.spinner("Searching the documents..."):
-            answer = rag.answer(question)
+        with st.spinner("Searching authorized documents..."):
+            answer = rag.answer(
+                question=question,
+                department=department,
+            )
 
         st.subheader("Answer")
         st.markdown(answer)

@@ -1,4 +1,3 @@
-from pathlib import Path
 import uuid
 
 import requests
@@ -20,6 +19,8 @@ from organization_rag.config import (
 
 MARKDOWN_FILE = MARKDOWN_DIR / "Placement Handbook for Session 2026-2027 (1).md"
 
+DEPARTMENT = "placement"
+
 
 def get_embedding(text: str) -> list[float]:
     response = requests.post(
@@ -37,17 +38,23 @@ def get_embedding(text: str) -> list[float]:
 
 
 def main() -> None:
-    # Read the parsed Markdown.
+    # ---------------------------------------------------------
+    # 1. Load the processed Markdown document
+    # ---------------------------------------------------------
     text = MARKDOWN_FILE.read_text(encoding="utf-8")
 
     document = Document(
         text=text,
         metadata={
             "source": MARKDOWN_FILE.name,
+            "document_type": "placement_handbook",
+            "department": DEPARTMENT,
         },
     )
 
-    # Split the document into chunks.
+    # ---------------------------------------------------------
+    # 2. Split document into chunks
+    # ---------------------------------------------------------
     splitter = SentenceSplitter(
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
@@ -57,10 +64,20 @@ def main() -> None:
 
     print(f"Created chunks: {len(nodes)}")
 
-    # Connect to Qdrant.
+    # ---------------------------------------------------------
+    # 3. Connect to Qdrant
+    # ---------------------------------------------------------
     client = QdrantClient(url=QDRANT_URL)
 
-    # Create the collection.
+    # Delete existing collection so we can rebuild the index
+    # with the new metadata.
+    if client.collection_exists(COLLECTION_NAME):
+        print(f"Deleting existing collection: {COLLECTION_NAME}")
+        client.delete_collection(COLLECTION_NAME)
+
+    # ---------------------------------------------------------
+    # 4. Create fresh Qdrant collection
+    # ---------------------------------------------------------
     client.create_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=models.VectorParams(
@@ -69,6 +86,9 @@ def main() -> None:
         ),
     )
 
+    # ---------------------------------------------------------
+    # 5. Generate embeddings and prepare Qdrant points
+    # ---------------------------------------------------------
     points = []
 
     for index, node in enumerate(nodes):
@@ -83,21 +103,30 @@ def main() -> None:
                 payload={
                     "text": node.text,
                     "source": MARKDOWN_FILE.name,
+                    "document_type": "placement_handbook",
+                    "department": DEPARTMENT,
                     "chunk_id": index,
                 },
             )
         )
 
+    # ---------------------------------------------------------
+    # 6. Insert vectors into Qdrant
+    # ---------------------------------------------------------
     client.upsert(
         collection_name=COLLECTION_NAME,
         points=points,
     )
 
+    # ---------------------------------------------------------
+    # 7. Verify ingestion
+    # ---------------------------------------------------------
     info = client.get_collection(COLLECTION_NAME)
 
     print()
     print("Ingestion completed successfully.")
     print(f"Collection: {COLLECTION_NAME}")
+    print(f"Department: {DEPARTMENT}")
     print(f"Points stored: {info.points_count}")
 
 
