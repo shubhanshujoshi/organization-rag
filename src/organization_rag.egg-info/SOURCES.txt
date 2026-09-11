@@ -1,0 +1,13 @@
+pyproject.toml
+src/organization_rag/answer.py
+src/organization_rag/chunk.py
+src/organization_rag/config.py
+src/organization_rag/embeddings.py
+src/organization_rag/ingest.py
+src/organization_rag/query.py
+src/organization_rag/retrieve.py
+src/organization_rag.egg-info/PKG-INFO
+src/organization_rag.egg-info/SOURCES.txt
+src/organization_rag.egg-info/dependency_links.txt
+src/organization_rag.egg-info/top_level.txt
+tests/test_project.py

@@ -6,21 +6,26 @@ from llama_index.core import Document
 from llama_index.core.node_parser import SentenceSplitter
 from qdrant_client import QdrantClient, models
 
-
-MARKDOWN_FILE = Path(
-    "data/markdown/Placement Handbook for Session 2026-2027 (1).md"
+from organization_rag.config import (
+    CHUNK_OVERLAP,
+    CHUNK_SIZE,
+    COLLECTION_NAME,
+    EMBEDDING_DIMENSIONS,
+    EMBEDDING_MODEL,
+    MARKDOWN_DIR,
+    OLLAMA_EMBED_URL,
+    QDRANT_URL,
 )
 
-OLLAMA_URL = "http://localhost:11434/api/embed"
-QDRANT_URL = "http://localhost:6333"
-COLLECTION_NAME = "organization_documents"
+
+MARKDOWN_FILE = MARKDOWN_DIR / "Placement Handbook for Session 2026-2027 (1).md"
 
 
 def get_embedding(text: str) -> list[float]:
     response = requests.post(
-        OLLAMA_URL,
+        OLLAMA_EMBED_URL,
         json={
-            "model": "nomic-embed-text",
+            "model": EMBEDDING_MODEL,
             "input": text,
         },
         timeout=120,
@@ -42,10 +47,10 @@ def main() -> None:
         },
     )
 
-    # Split the document into manageable chunks.
+    # Split the document into chunks.
     splitter = SentenceSplitter(
-        chunk_size=500,
-        chunk_overlap=50,
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
     )
 
     nodes = splitter.get_nodes_from_documents([document])
@@ -59,7 +64,7 @@ def main() -> None:
     client.create_collection(
         collection_name=COLLECTION_NAME,
         vectors_config=models.VectorParams(
-            size=768,
+            size=EMBEDDING_DIMENSIONS,
             distance=models.Distance.COSINE,
         ),
     )
@@ -83,7 +88,6 @@ def main() -> None:
             )
         )
 
-    # Insert all chunks into Qdrant.
     client.upsert(
         collection_name=COLLECTION_NAME,
         points=points,

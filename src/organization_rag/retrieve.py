@@ -1,48 +1,38 @@
-import requests
 from qdrant_client import QdrantClient
 
+from organization_rag.config import (
+    COLLECTION_NAME,
+    QDRANT_URL,
+    TOP_K,
+)
 
-OLLAMA_URL = "http://localhost:11434/api/embed"
-QDRANT_URL = "http://localhost:6333"
-COLLECTION_NAME = "organization_documents"
-
-
-def get_embedding(text: str) -> list[float]:
-    response = requests.post(
-        OLLAMA_URL,
-        json={
-            "model": "nomic-embed-text",
-            "input": text,
-        },
-        timeout=120,
-    )
-
-    response.raise_for_status()
-
-    return response.json()["embeddings"][0]
+from organization_rag.embeddings import get_embedding
 
 
-def main() -> None:
-    query = input("Enter your question: ")
-
-    # Convert the user's question into a vector.
+def retrieve(query: str, top_k: int = TOP_K):
     query_embedding = get_embedding(query)
 
-    # Connect to Qdrant.
     client = QdrantClient(url=QDRANT_URL)
 
-    # Search for the most similar chunks.
     results = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_embedding,
-        limit=3,
+        limit=top_k,
         with_payload=True,
     )
+
+    return results.points
+
+
+def main() -> None:
+    question = input("Enter your question: ")
+
+    results = retrieve(question)
 
     print("\nTop retrieved chunks:")
     print("=" * 80)
 
-    for rank, result in enumerate(results.points, start=1):
+    for rank, result in enumerate(results, start=1):
         print(f"\n--- Result {rank} ---")
         print(f"Score: {result.score:.4f}")
         print(f"Chunk ID: {result.payload['chunk_id']}")
