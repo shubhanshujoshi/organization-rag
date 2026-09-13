@@ -1,4 +1,9 @@
 from llama_index.core import VectorStoreIndex, StorageContext
+from llama_index.core.vector_stores import (
+    MetadataFilter,
+    MetadataFilters,
+    FilterOperator,
+)
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.qdrant import QdrantVectorStore
@@ -43,11 +48,91 @@ class LlamaIndexRAG:
             embed_model=self.embed_model,
         )
 
-        self.query_engine = self.index.as_query_engine(
-            llm=self.llm,
-            similarity_top_k=3,
+    def answer(
+        self,
+        question: str,
+        department: str,
+    ) -> tuple[str, list[dict]]:
+
+        filters = MetadataFilters(
+            filters=[
+                MetadataFilter(
+                    key="department",
+                    value=department,
+                    operator=FilterOperator.EQ,
+                )
+            ]
         )
 
-    def answer(self, question: str) -> str:
-        response = self.query_engine.query(question)
-        return str(response)
+        retriever = self.index.as_retriever(
+            similarity_top_k=3,
+            filters=filters,
+        )
+
+        results = retriever.retrieve(question)
+
+        if not results:
+            return (
+                "The provided documents do not contain enough "
+                "information to answer this.",
+                [],
+            )
+
+        context_parts = []
+        sources = []
+
+        for rank, result in enumerate(results, start=1):
+            node = result.node
+
+            source = node.metadata.get(
+                "source",
+                "Unknown source",
+            )
+
+            sources.append(
+                {
+                    "rank": rank,
+                    "source": source,
+                    "score": result.score,
+                    "department": node.metadata.get(
+                        "department",
+                        department,
+                    ),
+                }
+            )
+
+            context_parts.append(
+                f"[Source {rank} | {source}]\n"
+                f"{result.text}"
+            )
+
+        context = "\n\n---\n\n".join(context_parts)
+
+        prompt = f"""
+You are an organization policy assistant.
+
+Answer the user's question using ONLY the provided context.
+
+STRICT GROUNDING RULES:
+1. Do not use outside knowledge.
+2. Do not invent policies or information.
+3. Every factual claim must be supported by the context.
+4. Cite factual claims using [Source N].
+5. If the context does not contain enough information, say:
+"The provided documents do not contain enough information to answer this."
+
+Authorized department:
+{department}
+
+Retrieved context:
+{context}
+
+Question:
+{question}
+
+Answer:
+"""
+
+        response = self.llm.complete(prompt)
+
+        return str(response), sources

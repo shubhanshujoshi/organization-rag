@@ -1,6 +1,6 @@
 import streamlit as st
 
-from organization_rag.rag import OrganizationRAG
+from organization_rag.llamaindex_rag import LlamaIndexRAG
 
 
 st.set_page_config(
@@ -12,7 +12,7 @@ st.set_page_config(
 
 @st.cache_resource
 def load_rag():
-    return OrganizationRAG()
+    return LlamaIndexRAG()
 
 
 rag = load_rag()
@@ -48,10 +48,21 @@ if st.button("Ask"):
         st.warning("Please enter a question.")
     else:
         with st.spinner("Searching authorized documents..."):
-            answer = rag.answer(
+
+            answer, sources = rag.answer(
                 question=question,
                 department=department,
             )
 
         st.subheader("Answer")
         st.markdown(answer)
+
+        if sources:
+            st.subheader("Sources")
+
+            for source in sources:
+                st.write(
+                    f"**[{source['rank']}]** "
+                    f"{source['source']} "
+                    f"(score: {source['score']:.3f})"
+                )
