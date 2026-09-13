@@ -8,3 +8,4 @@ data/raw/
 data/processed/
 data/markdown/
 *.log
+tests/evaluation_results.json
