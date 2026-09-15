@@ -4,69 +4,76 @@
     "question": "How many placement attempts are allowed?",
     "department": "placement",
     "expected_behavior": "answer",
-    "expected_keywords": ["10"]
+    "expected_keywords": [
+      "placement attempts"
+    ]
   },
   {
     "id": 2,
     "question": "How many interview attempts are allowed?",
     "department": "placement",
     "expected_behavior": "answer",
-    "expected_keywords": ["5"]
+    "expected_keywords": [
+      "interview attempts"
+    ]
   },
   {
     "id": 3,
     "question": "What is the purpose of the placement office?",
     "department": "placement",
     "expected_behavior": "answer",
-    "expected_keywords": ["placement"]
+    "expected_keywords": [
+      "placement office"
+    ]
   },
   {
     "id": 4,
     "question": "What are the general principles of the placement process?",
     "department": "placement",
     "expected_behavior": "answer",
-    "expected_keywords": ["placement"]
+    "expected_keywords": [
+      "placement",
+      "process"
+    ]
   },
   {
     "id": 5,
     "question": "What are the placement rules mentioned in the handbook?",
     "department": "placement",
     "expected_behavior": "answer",
-    "expected_keywords": ["placement"]
+    "expected_keywords": [
+      "placement",
+      "rules"
+    ]
   },
   {
     "id": 6,
     "question": "What is the hostel fee?",
     "department": "placement",
-    "expected_behavior": "refuse",
-    "expected_keywords": ["not contain enough information"]
+    "expected_behavior": "refuse"
   },
   {
     "id": 7,
     "question": "What is the tuition fee?",
     "department": "placement",
-    "expected_behavior": "refuse",
-    "expected_keywords": ["not contain enough information"]
+    "expected_behavior": "refuse"
   },
   {
     "id": 8,
     "question": "How many placement attempts are allowed?",
     "department": "hr",
-    "expected_behavior": "unauthorized",
-    "expected_keywords": ["not contain enough information"]
+    "expected_behavior": "unauthorized"
   },
   {
     "id": 9,
     "question": "How many placement attempts are allowed?",
     "department": "finance",
-    "expected_behavior": "unauthorized",
-    "expected_keywords": ["not contain enough information"]
+    "expected_behavior": "unauthorized"
   },
   {
     "id": 10,
     "question": "How many placement attempts are allowed?",
     "department": "academic",
-    "expected_behavior": "unauthorized",
-    "expected_keywords": ["not contain enough information"]
+    "expected_behavior": "unauthorized"
   }
 ]

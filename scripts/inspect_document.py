@@ -4,7 +4,7 @@ from docling.document_converter import DocumentConverter
 
 
 INPUT_FILE = Path(
-    "data/raw/Placement Handbook for Session 2026-2027 (1).pdf"
+    "data/raw/placement/Placement Handbook for Session 2026-2027 (1).pdf"
 )
 
 

@@ -3,10 +3,22 @@ from pathlib import Path
 from llama_index.core import Document
 from llama_index.core.node_parser import SentenceSplitter
 
+from organization_rag.config import CHUNK_SIZE, CHUNK_OVERLAP
+
 
 MARKDOWN_FILE = Path(
     "data/markdown/Placement Handbook for Session 2026-2027 (1).md"
 )
+
+
+def chunk_documents(documents: list[Document]):
+    """Split LlamaIndex documents using the project's standard chunk settings."""
+    splitter = SentenceSplitter(
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP,
+    )
+
+    return splitter.get_nodes_from_documents(documents)
 
 
 def main() -> None:
@@ -19,12 +31,7 @@ def main() -> None:
         },
     )
 
-    splitter = SentenceSplitter(
-        chunk_size=500,
-        chunk_overlap=50,
-    )
-
-    nodes = splitter.get_nodes_from_documents([document])
+    nodes = chunk_documents([document])
 
     print(f"Created chunks: {len(nodes)}")
     print()
