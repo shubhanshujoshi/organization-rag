@@ -1,0 +1,23 @@
+# Core RAG
+llama-index
+llama-index-llms-ollama
+llama-index-embeddings-ollama
+llama-index-vector-stores-qdrant
+qdrant-client
+
+# Document processing
+docling
+openpyxl
+xlrd
+pandas
+
+# Vector stores
+chromadb
+psycopg[binary]
+
+# Application
+streamlit
+requests
+
+# Testing
+pytest
